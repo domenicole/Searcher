@@ -1,45 +1,54 @@
-async function search() {
+let currentPage = 1;
+const resultsPerPage = 20;
+let currentQuery = '';
+let totalResults = 0;
+
+async function search(page = 1) {
     const query = document.getElementById('searchInput').value.trim();
     const resultsDiv = document.getElementById('results');
     const infoDiv = document.getElementById('resultsInfo');
     
     if (!query) {
-        alert('Por favor ingresa un término de búsqueda');
+        alert('Please enter a search term');
         return;
     }
 
-    resultsDiv.innerHTML = '<div class="loading">Cargando resultados...</div>';
+    currentQuery = query;
+    currentPage = page;
+    
+    resultsDiv.innerHTML = '<div class="loading">Loading results...</div>';
     infoDiv.innerHTML = '';
 
     try {
-        const response = await fetch(`https://api.plos.org/search?q=${encodeURIComponent(query)}&fl=id,title,journal,publication_date,article_type,author,abstract,score&rows=20&wt=json`);
+        const start = (page - 1) * resultsPerPage;
+        const response = await fetch(`https://api.plos.org/search?q=${encodeURIComponent(query)}&fl=id,title,journal,publication_date,article_type,author,score&rows=${resultsPerPage}&start=${start}&wt=json`);
         
         if (!response.ok) {
-            throw new Error('Error en la búsqueda');
+            throw new Error('Search error');
         }
 
         const data = await response.json();
         const docs = data.response.docs;
-        const total = data.response.numFound;
+        totalResults = data.response.numFound;
+        const totalPages = Math.ceil(totalResults / resultsPerPage);
 
         if (docs.length === 0) {
-            resultsDiv.innerHTML = '<div class="error">No se encontraron resultados</div>';
+            resultsDiv.innerHTML = '<div class="error">No results found</div>';
             return;
         }
 
-        infoDiv.innerHTML = `Resultados encontrados: ${total} | Mostrando página 1 de ${Math.ceil(total / 20)}`;
+        infoDiv.innerHTML = `Results found: ${totalResults} | Showing page ${page} of ${totalPages}`;
 
         let tableHTML = `
             <table>
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Título</th>
+                        <th>Title</th>
                         <th>Journal</th>
-                        <th>Fecha de Publicación</th>
-                        <th>Tipo de Artículo</th>
-                        <th>Autores</th>
-                        <th>Abstract</th>
+                        <th>Publication Date</th>
+                        <th>Article Type</th>
+                        <th>Authors</th>
                         <th>Score</th>
                         <th>DOI</th>
                     </tr>
@@ -49,20 +58,19 @@ async function search() {
 
         docs.forEach((doc, index) => {
             const authors = doc.author ? doc.author.slice(0, 3).join(', ') : 'N/A';
-            const abstract = doc.abstract ? doc.abstract[0].substring(0, 150) + '...' : '...';
             const doi = doc.id || 'N/A';
             const score = doc.score ? doc.score.toFixed(2) : 'N/A';
-            const date = doc.publication_date ? new Date(doc.publication_date).toLocaleDateString('es-ES') : 'N/A';
+            const date = doc.publication_date ? new Date(doc.publication_date).toLocaleDateString('en-US') : 'N/A';
+            const globalIndex = start + index + 1;
             
             tableHTML += `
                 <tr>
-                    <td>${index + 1}</td>
-                    <td><strong>${doc.title || 'Sin título'}</strong></td>
+                    <td>${globalIndex}</td>
+                    <td><strong>${doc.title || 'No title'}</strong></td>
                     <td>${doc.journal || 'N/A'}</td>
                     <td>${date}</td>
                     <td>${doc.article_type || 'N/A'}</td>
                     <td>${authors}</td>
-                    <td class="abstract">${abstract}</td>
                     <td class="score">${score}</td>
                     <td><a href="https://doi.org/${doi}" target="_blank">${doi}</a></td>
                 </tr>
@@ -70,19 +78,49 @@ async function search() {
         });
 
         tableHTML += '</tbody></table>';
-        resultsDiv.innerHTML = tableHTML;
+        
+        // Agregar botones de paginación
+        const paginationHTML = createPagination(page, totalPages);
+        
+        resultsDiv.innerHTML = paginationHTML + tableHTML + paginationHTML;
 
     } catch (error) {
-        resultsDiv.innerHTML = `<div class="error">Error al cargar los resultados: ${error.message}</div>`;
+        resultsDiv.innerHTML = `<div class="error">Error loading results: ${error.message}</div>`;
     }
+}
+
+function createPagination(currentPage, totalPages) {
+    if (totalPages <= 1) return '';
+    
+    let paginationHTML = '<div class="pagination">';
+    
+    // Botón Previous
+    if (currentPage > 1) {
+        paginationHTML += `<button onclick="search(${currentPage - 1})">Previous</button>`;
+    } else {
+        paginationHTML += `<button disabled>Previous</button>`;
+    }
+    
+    // Números de página
+    paginationHTML += `<span class="page-info">Page ${currentPage} of ${totalPages}</span>`;
+    
+    // Botón Next
+    if (currentPage < totalPages) {
+        paginationHTML += `<button onclick="search(${currentPage + 1})">Next</button>`;
+    } else {
+        paginationHTML += `<button disabled>Next</button>`;
+    }
+    
+    paginationHTML += '</div>';
+    return paginationHTML;
 }
 
 // Buscar al presionar Enter
 document.getElementById('searchInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
-        search();
+        search(1);
     }
 });
 
 // Búsqueda inicial
-search();
+search(1);
