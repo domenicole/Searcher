@@ -1,0 +1,130 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #ffc0cb 0%, #ffb6c1 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #d63384;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid #ffb6c1;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+    border-color: #d63384;
+}
+
+button {
+    padding: 12px 30px;
+    background: #d63384;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #b52d6f;
+}
+
+.results-info {
+    color: #666;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #d63384;
+    font-size: 18px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th {
+    background: #ffb6c1;
+    color: #333;
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 2px solid #d63384;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #ffc0cb;
+}
+
+tr:hover {
+    background: #fff0f5;
+}
+
+.score {
+    font-weight: bold;
+    color: #d63384;
+}
+
+a {
+    color: #d63384;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.abstract {
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.error {
+    background: #ffe0e0;
+    color: #c00;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+    text-align: center;
+}
